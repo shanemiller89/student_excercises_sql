@@ -184,6 +184,97 @@ class StudentExerciseReports():
 
             [print(e) for e in all_csharp] 
 
+    def student_assignments(self):
+
+        assignments = {}
+        
+        with sqlite3.connect(self.db_path) as conn:
+            db_cursor = conn.cursor()
+        
+        db_cursor.execute("""
+        Select s.firstName, s.lastName, e.excerciseName
+        FROM StudentExcercises se
+        JOIN Students s ON se.studentId = s.studentId
+        JOIN Excercises e ON se.excerciseId = e.excerciseId
+        """)
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            student_name = f'{row[0]} {row[1]}'
+            excercise_name = row[2]
+            if student_name not in assignments:
+                assignments[student_name] = [excercise_name]
+            else:
+                assignments[student_name].append(excercise_name)
+
+        for student, excercises in assignments.items():
+
+            print(student)
+            for excercise in excercises:
+                print(f' \t* {excercise}')
+
+    def instructor_assignments(self):
+            
+        assignments = {}
+
+        with sqlite3.connect(self.db_path) as conn:
+            db_cursor = conn.cursor()
+        
+        db_cursor.execute("""
+        Select i.firstName, i.lastName, e.excerciseName
+        from StudentExcercises se
+        JOIN Instructors i ON se.instructorId = i.instructorId
+        JOIN Excercises e ON se.excerciseId = e.excerciseId
+        GROUP BY e.excerciseName;
+        """)
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            instructor_name = f'{row[0]} {row[1]}'
+            excercise_name = row[2]
+            if instructor_name not in assignments:
+                assignments[instructor_name] = [excercise_name]
+            else:
+                assignments[instructor_name].append(excercise_name)
+
+        for instructor, excercises in assignments.items():
+
+            print(instructor)
+            for excercise in excercises:
+                print(f' \t* {excercise}')
+
+    def excercise_assignments(self):
+
+        assignments = {}
+        
+        with sqlite3.connect(self.db_path) as conn:
+            db_cursor = conn.cursor()
+        
+        db_cursor.execute("""
+        Select s.firstName, s.lastName, e.excerciseName
+        FROM StudentExcercises se
+        JOIN Students s ON se.studentId = s.studentId
+        JOIN Excercises e ON se.excerciseId = e.excerciseId
+        """)
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            student_name = f'{row[0]} {row[1]}'
+            excercise_name = row[2]
+            if excercise_name not in assignments:
+                assignments[excercise_name] = [student_name]
+            else:
+                assignments[excercise_name].append(student_name)
+
+        for excercise, students in assignments.items():
+
+            print(excercise)
+            for student in students:
+                print(f' \t* {student}')
+
 reports = StudentExerciseReports()
 
 def build_menu():
@@ -193,7 +284,10 @@ def build_menu():
     print("4. View Excercises")
     print("5. View Javascript Excercises")
     print("6. View Python Excercises")
-    print("7. View C# Excercises \n")
+    print("7. View C# Excercises")
+    print("8. View Student Assignments")
+    print("9. View Instructor Assignments")
+    print("10. Excercise Overview \n")
     menu_options()
 
 
@@ -219,6 +313,15 @@ def menu_options():
         build_menu()
     if (userinput == "7"):
         reports.all_csharp()
+        build_menu()
+    if (userinput == "8"):
+        reports.student_assignments()
+        build_menu()
+    if (userinput == "9"):
+        reports.instructor_assignments()
+        build_menu()
+    if (userinput == "10"):
+        reports.excercise_assignments()
         build_menu()
     
 build_menu()
